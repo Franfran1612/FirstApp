@@ -1,10 +1,10 @@
 import flet as ft
 from flet.core.app_bar import AppBar
 from flet.core.colors import Colors
-from flet.core.elevated_button import ElevatedButton
 from flet.core.text import Text
 from flet.core.view import View
-from models_livro import Livro
+from models_livro import Livro, db_session
+from sqlalchemy import select
 
 
 def main(page: ft.Page):
@@ -15,8 +15,7 @@ def main(page: ft.Page):
     page.window.width = 375
     page.window.height = 667
 
-    livro = []
-
+    lista_livro = []
     def salvar_livro(e):
 
         if titulo_livro.value == "" or descricao.value == "" or categoria.value == "" or autor.value == "":
@@ -33,7 +32,8 @@ def main(page: ft.Page):
                 categoria=categoria.value,
                 autor=autor.value,
             )
-            livro.append(obj_livro)
+            obj_livro.save()
+            lista_livro.append(obj_livro)
             titulo_livro.value = ""
             descricao.value = ""
             categoria.value = ""
@@ -43,12 +43,17 @@ def main(page: ft.Page):
             page.update()
 
     def exibir_livros(e):
+        #  select  banco de dados
+        sql_livro = select(Livro).where()
+        result = db_session.execute(sql_livro).scalars()
         # clear é pra apagar o negocio da lista para não repitir
         lv_livro.controls.clear()
-        for livros in livro:
+
+
+        for livro in result:
             lv_livro.controls.append(
                 ft.ListTile(
-                    title=ft.Text(f"Livro - {titulo_livro.value}"),
+                    title=ft.Text(f"Livro - {livro.titulo_livro}"),
                     trailing=ft.PopupMenuButton(
                         icon=ft.Icons.MORE_VERT,
                         items=[
@@ -61,7 +66,7 @@ def main(page: ft.Page):
         page.update()
     def detalhes_livro(e):
         lv_livro.controls.clear()
-        for livros in livro:
+        for livros in lista_livro:
             lv_livro.controls.append(
                 ft.Text(value=f"{livros.titulo_livro} - {livros.descricao} - {livros.categoria} - {livros.autor}")
             )
@@ -84,7 +89,6 @@ def main(page: ft.Page):
                         ft.Button(
                             text="Exibir livros ",
                             on_click=lambda _: page.go("/segunda"),
-
                     ),
                 ],
             )
@@ -106,14 +110,16 @@ def main(page: ft.Page):
             detalhes_livro(e)
             page.views.append(
                 View(
+
                     "detalhes livros",
                     [
-                        lv_livro
+                        lv_livro,
+                        ft.Button(
+                            text="Exibir livros ",on_click=lambda _: page.go("/segunda"))
                     ]
                 )
             )
         page.update()
-
 
     def voltar(e):
         page.views.pop()

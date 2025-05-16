@@ -56,7 +56,7 @@ def main(page: ft.Page):
                 "/",
                 [
                     AppBar(title=Text("Tela inicial"), bgcolor=Colors.BLACK),
-                    ft.Image(src='img.png'),
+                    ft.Image(src='../img.png'),
                     ElevatedButton(text="Regras", on_click=lambda _: page.go("/Regras")),
                     ElevatedButton(text="Simulação", on_click=lambda _: page.go("/Simulação")),
                 ],
